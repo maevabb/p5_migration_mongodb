@@ -23,3 +23,7 @@ Thumbs.db
 # Ignore large files like raw data, models, or other binary files
 data/
 models/
+
+# MongoDB logs and database files
+/mongod.log
+/db/
