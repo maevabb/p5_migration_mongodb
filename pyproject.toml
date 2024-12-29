@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "p5-migration-mongodb"
+version = "0.1.0"
+description = ""
+authors = ["Maeva Beauvillain <m.berte@hotmail.fr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pandas = "^2.2.3"
+pymongo = "^4.10.1"
+pytest = "^8.3.4"
+mlflow = "^2.19.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
