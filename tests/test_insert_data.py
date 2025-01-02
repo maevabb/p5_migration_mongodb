@@ -26,6 +26,22 @@ def healthcare_data():
 
     return df
 
+# Fixture pour exporter les données depuis MongoDB
+@pytest.fixture
+def export_healthcare_data(mongo_client):
+    """Export des données de MongoDB vers un fichier CSV"""
+    db = mongo_client["test_healthcare_db"]
+    collection = db["test_patients"]
+
+    # Export des données de MongoDB vers un fichier CSV
+    cursor = collection.find({}, {"_id": 0})
+    data_from_mongo = list(cursor)
+    df_exported = pd.DataFrame(data_from_mongo)
+    df_exported.to_csv('exported_healthcare_dataset.csv', index=False)
+
+    return df_exported
+
+
 def test_data_insertion(mongo_client, healthcare_data):
     """Test pour vérifier que les données sont insérées dans MongoDB"""
 
@@ -61,21 +77,15 @@ def test_data_integrity(mongo_client, healthcare_data):
         "Medication", "Test Results"
     ]
 
-# Récupération des colonnes des documents
+    # Récupération des colonnes des documents et vérification de leur présence et de leurs valeurs
     for record in collection.find():
+
         for column in expected_columns:
-            # Vérification de la présence de la colonne
             assert column in record, f"Colonne manquante dans un document : {column}"
-            # Vérification des valeurs vides ou manquantes
             assert record[column] not in [None, ""], f"Valeur manquante ou vide pour la colonne {column} dans {record['Name']}"
 
-    # Vérification des colonnes vides ou manquantes dans la base de données
-    for record in collection.find():
-        for column in expected_columns:
-            assert column in record, f"Colonne manquante dans un document : {column}"
-            assert record[column] is not None, f"Valeur manquante pour la colonne {column} dans {record['Name']}"
 
-    # Vérification des types de données
+      # Vérification des types de données
     for record in collection.find():
         assert isinstance(record["Age"], int), f"Age invalide pour {record['Name']}"
         assert isinstance(record["Billing Amount"], float), f"Billing Amount invalide pour {record['Name']}"
@@ -96,3 +106,20 @@ def test_data_integrity(mongo_client, healthcare_data):
     assert list(duplicates) == [], "Des doublons ont été trouvés dans la base de données."
 
     print("Test d'intégrité des données réussi.")
+
+
+def test_export_integrity(mongo_client, healthcare_data, export_healthcare_data):
+    """Test pour vérifier l'intégrité des données après exportation depuis MongoDB"""
+    
+    # Test 1: Vérification du nombre de lignes
+    assert len(healthcare_data) == len(export_healthcare_data), "Le nombre de lignes ne correspond pas entre le fichier d'origine et le fichier exporté."
+
+    # Test 2: Vérification des colonnes
+    assert list(healthcare_data.columns) == list(export_healthcare_data.columns), "Les colonnes ne correspondent pas entre le fichier d'origine et le fichier exporté."
+
+    # Test 3: Comparaison des valeurs pour les premières lignes
+    for col in healthcare_data.columns:
+        for i in range(min(5, len(healthcare_data))):  # Vérification des 5 premières lignes
+            assert healthcare_data.iloc[i][col] == export_healthcare_data.iloc[i][col], f"Valeur différente pour {col} à la ligne {i+1}"
+
+    print("Test d'intégrité de l'export réussi.")
