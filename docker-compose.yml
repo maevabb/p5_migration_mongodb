@@ -1,0 +1,36 @@
+services: 
+  mongodb:
+    image: mongo:8.0.4
+    container_name: mongodb
+    ports: 
+      - "27017:27017"
+    volumes: 
+      - mongo_data:/data/db
+    networks:
+      - my_network
+    restart: always
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python-app
+    depends_on:
+      - mongodb
+    volumes:
+      - ./:/app
+    networks:
+      - my_network
+    command: >
+      sh -c "
+      poetry run pytest &&
+      poetry run python insert_data.py
+      "
+    restart: no
+
+volumes:
+  mongo_data:
+
+networks:
+  my_network:
+    driver: bridge
