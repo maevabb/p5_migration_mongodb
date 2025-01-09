@@ -3,7 +3,7 @@ import pymongo
 from pymongo  import MongoClient, ASCENDING
 
 #Connexion à MongoDB
-client = MongoClient(host="localhost", port=27017) #connexion au serveur local
+client = MongoClient(host="mongodb", port=27017) #connexion au serveur mongodb
 db = client["healthcare_db"] #Création de la bdd
 collection = db["patients"] #Création de la collection
 

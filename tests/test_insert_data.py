@@ -8,7 +8,7 @@ from pymongo.errors import ConnectionFailure
 @pytest.fixture
 def mongo_client():
     """Fixture pour la connexion à MongoDB"""
-    client = MongoClient(host="localhost", port=27017)
+    client = MongoClient(host="mongodb", port=27017)
     yield client
     client.close()
 
