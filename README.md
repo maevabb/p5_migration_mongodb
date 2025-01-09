@@ -61,6 +61,7 @@ Voici un exemple de document issu de la collection `patients`, basé sur le data
   "Medication": "Paracetamol",
   "Test_Results": "Normal"
 }
+```
 
 ## Installation
 
