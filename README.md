@@ -1,6 +1,6 @@
 # Projet de Migration vers MongoDB avec Docker
 
-**Dernière mise à jour : 6 janvier 2025**
+**Dernière mise à jour : 9 janvier 2025**
 
 Ce projet consiste à migrer des données médicales à partir d'un fichier CSV vers une base de données MongoDB, tout en utilisant Docker pour une gestion efficace de l'environnement.
 
@@ -12,6 +12,55 @@ Avant de commencer, assurez-vous que vous avez les outils suivants installés su
 - [Git](https://git-scm.com/) : pour cloner le dépôt.
 
 > **Note :** Poetry est déjà installé et utilisé dans le conteneur Docker. Vous n'avez pas besoin de l'installer localement.
+
+## Schéma de la Base de Données
+
+### Structure de la collection
+
+La base de données contient une seule collection : `patients`. Voici la structure de la collection :
+
+| Champ                | Type     | Description                                                        |
+|----------------------|----------|--------------------------------------------------------------------|
+| `Name`               | string   | Nom du patient                                                     |
+| `Age`                | int      | Âge du patient                                                     |
+| `Gender`             | string   | Genre du patient                                                   |
+| `Blood_Type`         | string   | Groupe sanguin du patient                                          |
+| `Medical_Condition`  | string   | Pathologie principale du patient                                   |
+| `Date_of_Admission`  | date     | Date d'admission à l'hôpital                                       |
+| `Doctor`             | string   | Médecin en charge du patient                                       |
+| `Hospital`           | string   | Nom de l'hôpital où le patient a été admis                         |
+| `Insurance_Provider` | string   | Assureur du patient                                                |
+| `Billing_Amount`     | float    | Montant de la facture associée au patient                          |
+| `Room_Number`        | int      | Numéro de la chambre assignée au patient                           |
+| `Admission_Type`     | string   | Type d'admission (Urgent, Emergency, etc.)                         |
+| `Discharge_Date`     | date     | Date de sortie de l'hôpital                                        |
+| `Medication`         | string   | Médication prescrite au patient                                    |
+| `Test_Results`       | string   | Résultats des tests médicaux (Normal, Inconclusive, etc.)          |
+
+Cette structure permet de capturer toutes les informations nécessaires pour analyser les données médicales des patients et effectuer des requêtes pertinentes sur la base de données.
+
+### Exemple de document JSON
+
+Voici un exemple de document issu de la collection `patients`, basé sur le dataset utilisé dans ce projet :
+
+```json
+{
+  "Name": "Bob** Jac****",
+  "Age": 30,
+  "Gender": "Male",
+  "Blood_Type": "B-",
+  "Medical_Condition": "Cancer",
+  "Date_of_Admission": "2024-01-31",
+  "Doctor": "Matthew Smith",
+  "Hospital": "Sons and Miller",
+  "Insurance_Provider": "Blue Cross",
+  "Billing_Amount": 18856.28,
+  "Room_Number": 328,
+  "Admission_Type": "Urgent",
+  "Discharge_Date": "2024-02-02",
+  "Medication": "Paracetamol",
+  "Test_Results": "Normal"
+}
 
 ## Installation
 
@@ -110,11 +159,39 @@ Pour ajouter des tests supplémentaires, créez un fichier dans le répertoire `
 ├── README.md                 # Documentation du projet
 ```
 
-## Remarque
+## Système d’authentification et rôles utilisateurs
 
-- **Redémarrage Automatique** :
-  - MongoDB redémarre automatiquement en cas de panne (`restart: always`).
-  - Le service Python ne redémarre pas automatiquement pour éviter des exécutions redondantes.
+### Authentification MongoDB
+
+L'accès à la base de données MongoDB est sécurisé par plusieurs rôles d'utilisateurs. Voici la liste des rôles et des utilisateurs associés :
+
+1. **Admin** :  
+   - **Nom d’utilisateur** : `adminUser`  
+   - **Mot de passe** : `adminpassword`  
+   - **Rôles** : `readWrite`, `dbAdmin`, `clusterAdmin`  
+   - **Accès** : Accès complet à MongoDB (gestion de la base de données et des utilisateurs).
+
+2. **Utilisateur de lecture** :  
+   - **Nom d’utilisateur** : `readOnlyUser`  
+   - **Mot de passe** : `readonlypassword`  
+   - **Rôles** : `read`  
+   - **Accès** : Lecture seule dans la base de données.
+
+3. **Utilisateur d'écriture** :  
+   - **Nom d’utilisateur** : `writeUser`  
+   - **Mot de passe** : `writepassword`  
+   - **Rôles** : `readWrite`  
+   - **Accès** : Lecture et écriture dans la base de données.
+
+4. **Support** :  
+   - **Nom d’utilisateur** : `supportUser`  
+   - **Mot de passe** : `supportpassword`  
+   - **Rôles** : `read`, `readWrite`, `dbAdmin`  
+   - **Accès** : Accès en lecture et écriture à la base de données avec des privilèges administratifs limités pour certaines collections.
+
+### Sécurité
+
+Assurez-vous de ne pas exposer ces identifiants dans des environnements non sécurisés. Utilisez des variables d’environnement ou un gestionnaire de secrets pour des environnements de production.
 
 ## Configuration du Réseau
 
